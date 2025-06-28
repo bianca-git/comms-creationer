@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
+           xsi:type="TaskPaneApp">
+
+  <!-- Begin Basic Settings: Add-in metadata, used for all versions of Office unless override provided. -->
+  <Id>12345678-1234-1234-1234-123456789012</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Your Organization</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  
+  <!-- The display name of your add-in. Used on the store and various places of the Office UI such as the add-ins dialog. -->
+  <DisplayName DefaultValue="Staff Communication Tool" />
+  <Description DefaultValue="Advanced mail merge and staff communication tool for Excel with SharePoint integration." />
+
+  <!-- Icon for your add-in. Used on installation screens and the add-ins dialog. -->
+  <IconUrl DefaultValue="https://yourdomain.com/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://yourdomain.com/assets/icon-64.png" />
+
+  <!-- Support URL for your add-in -->
+  <SupportUrl DefaultValue="https://yourdomain.com/support" />
+
+  <!-- Domains that will be allowed when navigating. For example, if you use ShowTaskpane and then have an href link, navigation will only be allowed if the domain is on this list. -->
+  <AppDomains>
+    <AppDomain>https://yourdomain.com</AppDomain>
+    <AppDomain>https://login.microsoftonline.com</AppDomain>
+    <AppDomain>https://graph.microsoft.com</AppDomain>
+  </AppDomains>
+
+  <!-- Begin Basic Settings: Add-in metadata, used for all versions of Office unless override provided. -->
+
+  <!-- Hosts section. This is where you specify which Office applications your add-in will work with. -->
+  <Hosts>
+    <Host Name="Workbook" />
+  </Hosts>
+
+  <!-- Requirements section. This is where you specify the minimum requirement set and version of Office.js your add-in needs to run. -->
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="ExcelApi" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+
+  <!-- Begin Add-in Commands Mode integration. This section is used when the add-in will expose a button on the Office ribbon. -->
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://yourdomain.com/taskpane.html" />
+  </DefaultSettings>
+
+  <!-- End Add-in Commands Mode integration. -->
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <!-- Begin Add-in Commands Mode integration. This section is used when the add-in will expose a button on the Office ribbon. -->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+
+    <!-- The Hosts node is required. -->
+    <Hosts>
+      <!-- Each host can have a different set of commands. -->
+      <!-- Excel host is Workbook, Word host is Document, and PowerPoint host is Presentation. -->
+      <!-- Make sure the hosts you override match the hosts declared in the top level <Hosts> section. -->
+      <Host xsi:type="Workbook">
+        <!-- Form factor. Currently only DesktopFormFactor is supported. -->
+        <DesktopFormFactor>
+          <!-- "This code enables a customizable message to be displayed when the add-in is loaded successfully upon individual install." -->
+          <GetStarted>
+            <!-- Title of the Getting Started callout. resid points to a ShortString resource -->
+            <Title resid="GetStarted.Title"/>
+            <!-- Description of the Getting Started callout. resid points to a LongString resource -->
+            <Description resid="GetStarted.Description"/>
+            <!-- Point to a url resource which details how the add-in should be used. -->
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
+          </GetStarted>
+          
+          <!-- Function file is a HTML page that includes the JavaScript where functions for ExecuteAction will be called. 
+               Think of the FunctionFile as the code behind ExecuteFunction. -->
+          <FunctionFile resid="Commands.Url" />
+
+          <!-- PrimaryCommandSurface is the main Office ribbon. -->
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <!-- Use OfficeTab to extend an existing Tab. Use CustomTab to create a new tab. -->
+            <OfficeTab id="TabHome">
+              <!-- Ensure you provide a unique id for the group. Recommendation for any IDs is to namespace using your company name. -->
+              <Group id="StaffComm.Group1">
+                <!-- Label for your group. resid must point to a ShortString resource. -->
+                <Label resid="GroupLabel" />
+                <!-- Icons. Required sizes 16,32,80, optional 20, 24, 40, 48, 64. Strongly recommended to provide all sizes for great UX. -->
+                <!-- Use PNG icons. All URLs on the resources section must use HTTPS. -->
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+
+                <!-- Control. It can be of type "Button" or "Menu". -->
+                <Control xsi:type="Button" id="StaffComm.TaskpaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Supertip>
+                    <!-- ToolTip title. resid must point to a ShortString resource. -->
+                    <Title resid="TaskpaneButton.Label" />
+                    <!-- ToolTip description. resid must point to a LongString resource. -->
+                    <Description resid="TaskpaneButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+
+                  <!-- This is what happens when the command is triggered (E.g. click on the Ribbon). Supported actions are ExecuteFunction or ShowTaskpane. -->
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <!-- Provide a url resource id for the location that will be displayed on the task pane. -->
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <!-- You can use resources across hosts and form factors. -->
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://yourdomain.com/assets/icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://yourdomain.com/assets/icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://yourdomain.com/assets/icon-80.png" />
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://yourdomain.com/docs/USER_GUIDE.md" />
+        <bt:Url id="Commands.Url" DefaultValue="https://yourdomain.com/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://yourdomain.com/taskpane.html" />
+      </bt:Urls>
+      <!-- ShortStrings max characters==125. -->
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="Get started with Staff Communication Tool!" />
+        <bt:String id="GroupLabel" DefaultValue="Staff Communication" />
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Staff Communication" />
+      </bt:ShortStrings>
+      <!-- LongStrings max characters==250. -->
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Your staff communication tool loaded successfully. Go to the HOME tab and click the 'Staff Communication' button to get started." />
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open the Staff Communication tool for advanced mail merge and template management." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+  <!-- End Add-in Commands Mode integration. -->
+
+</OfficeApp>
+
