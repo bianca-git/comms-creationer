@@ -1,0 +1,56 @@
+{
+  "name": "staff-communication-excel-addon",
+  "version": "1.0.0",
+  "description": "Internal staff communication tool with advanced mail merge capabilities for Excel",
+  "main": "dist/taskpane.html",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "build:dev": "webpack --mode=development",
+    "dev": "webpack serve --mode=development --open",
+    "start": "webpack serve --mode=development",
+    "test": "echo \"Tests will be implemented\" && exit 0",
+    "lint": "echo \"Linting will be implemented\" && exit 0",
+    "deploy": "npm run build && node scripts/deploy.js",
+    "deploy:github": "npm run build && node scripts/deploy-github.js",
+    "validate": "node scripts/validate-manifest.js",
+    "serve": "python3 -m http.server 3000 --directory dist"
+  },
+  "keywords": [
+    "office-addin",
+    "excel",
+    "mail-merge",
+    "staff-communication",
+    "sharepoint",
+    "internal-tools"
+  ],
+  "author": "Your Organization",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/staff-communication-addon.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/staff-communication-addon/issues"
+  },
+  "homepage": "https://github.com/yourusername/staff-communication-addon#readme",
+  "dependencies": {
+    "@microsoft/office-js": "^1.1.85",
+    "@azure/msal-browser": "^3.0.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "html-webpack-plugin": "^5.5.3",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "style-loader": "^3.3.3",
+    "file-loader": "^6.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
+

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Email Marketing Add-in</title>
+    
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            margin-top: 0;
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .contact-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .feature-btn {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 15px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>📧 Email Marketing</h1>
+    </div>
+    
+    <div class="container">
+        <!-- Connection Status -->
+        <div class="section">
+            <h2>🔗 Connection Status</h2>
+            <div id="connectionStatus" class="status info">
+                Initializing...
+            </div>
+            <button id="connectBtn" class="btn" disabled>
+                Connect to SharePoint
+            </button>
+        </div>
+        
+        <!-- Contact Management -->
+        <div class="section">
+            <h2>👥 Contact Management</h2>
+            <div class="contact-count" id="contactCount">0</div>
+            <div style="text-align: center; margin-bottom: 15px;">contacts loaded</div>
+            
+            <button id="loadContactsBtn" class="btn">
+                📊 Load Contacts from Excel
+            </button>
+            
+            <button id="syncContactsBtn" class="btn">
+                🔄 Sync with SharePoint
+            </button>
+            
+            <div class="feature-grid">
+                <div class="feature-btn" onclick="showFeature('import')">
+                    📥 Import
+                </div>
+                <div class="feature-btn" onclick="showFeature('export')">
+                    📤 Export
+                </div>
+                <div class="feature-btn" onclick="showFeature('segments')">
+                    🎯 Segments
+                </div>
+                <div class="feature-btn" onclick="showFeature('cleanup')">
+                    🧹 Cleanup
+                </div>
+            </div>
+        </div>
+        
+        <!-- Email Templates -->
+        <div class="section">
+            <h2>📝 Email Templates</h2>
+            <button id="createTemplateBtn" class="btn">
+                ✨ Create New Template
+            </button>
+            
+            <button id="manageTemplatesBtn" class="btn">
+                📋 Manage Templates
+            </button>
+            
+            <div class="feature-grid">
+                <div class="feature-btn" onclick="showFeature('templates')">
+                    📄 Browse
+                </div>
+                <div class="feature-btn" onclick="showFeature('editor')">
+                    ✏️ Editor
+                </div>
+            </div>
+        </div>
+        
+        <!-- Campaign Management -->
+        <div class="section">
+            <h2>🚀 Campaigns</h2>
+            <button id="createCampaignBtn" class="btn">
+                🎯 Create Campaign
+            </button>
+            
+            <button id="viewCampaignsBtn" class="btn">
+                📈 View Analytics
+            </button>
+            
+            <div class="feature-grid">
+                <div class="feature-btn" onclick="showFeature('schedule')">
+                    ⏰ Schedule
+                </div>
+                <div class="feature-btn" onclick="showFeature('analytics')">
+                    📊 Analytics
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div>Processing...</div>
+        </div>
+    </div>
+</body>
+</html>
+

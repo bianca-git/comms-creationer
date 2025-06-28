@@ -1,0 +1,169 @@
+name: Development Workflow
+
+on:
+  push:
+    branches: [ develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npm run lint
+      continue-on-error: true
+      
+    - name: Validate manifest
+      run: |
+        echo "🔍 Validating Office Add-in manifest..."
+        node -e "
+          const fs = require('fs');
+          const path = require('path');
+          
+          const manifestPath = path.join(process.cwd(), 'manifest.xml');
+          if (!fs.existsSync(manifestPath)) {
+            console.error('❌ manifest.xml not found');
+            process.exit(1);
+          }
+          
+          const manifest = fs.readFileSync(manifestPath, 'utf8');
+          
+          // Check required elements
+          const requiredElements = [
+            '<OfficeApp',
+            '<Id>',
+            '<Version>',
+            '<ProviderName>',
+            '<DefaultLocale>',
+            '<DisplayName>',
+            '<Description>',
+            '<IconUrl>',
+            '<HighResolutionIconUrl>',
+            '<SupportUrl>',
+            '<AppDomains>',
+            '<Hosts>',
+            '<Requirements>',
+            '<DefaultSettings>',
+            '<Permissions>'
+          ];
+          
+          const missingElements = requiredElements.filter(element => !manifest.includes(element));
+          
+          if (missingElements.length > 0) {
+            console.error('❌ Missing required manifest elements:', missingElements);
+            process.exit(1);
+          }
+          
+          // Check for localhost URLs in production manifest
+          if (manifest.includes('localhost') && !manifest.includes('<!-- Development -->')) {
+            console.warn('⚠️  Warning: Manifest contains localhost URLs');
+          }
+          
+          console.log('✅ Manifest validation passed');
+        "
+        
+    - name: Build project
+      run: npm run build
+      
+    - name: Test build output
+      run: |
+        echo "🧪 Testing build output..."
+        
+        # Check if required files exist
+        required_files=(
+          "dist/taskpane.html"
+          "dist/taskpane.js"
+          "dist/commands.html"
+          "dist/commands.js"
+          "dist/manifest.xml"
+        )
+        
+        for file in "${required_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing required file: $file"
+            exit 1
+          else
+            echo "✅ Found: $file"
+          fi
+        done
+        
+        # Check file sizes
+        taskpane_size=$(stat -c%s "dist/taskpane.js")
+        if [ $taskpane_size -lt 1000 ]; then
+          echo "⚠️  Warning: taskpane.js seems too small ($taskpane_size bytes)"
+        else
+          echo "✅ taskpane.js size looks good ($taskpane_size bytes)"
+        fi
+        
+        echo "🎉 Build output validation passed!"
+        
+    - name: Security scan
+      run: |
+        echo "🔒 Running basic security checks..."
+        
+        # Check for common security issues in built files
+        if grep -r "eval(" dist/ 2>/dev/null; then
+          echo "⚠️  Warning: Found eval() usage in built files"
+        fi
+        
+        if grep -r "innerHTML.*=" dist/ 2>/dev/null; then
+          echo "⚠️  Warning: Found innerHTML usage - ensure proper sanitization"
+        fi
+        
+        if grep -r "http://" dist/ 2>/dev/null; then
+          echo "❌ Error: Found insecure HTTP URLs in built files"
+          exit 1
+        fi
+        
+        echo "✅ Basic security checks passed"
+        
+    - name: Generate preview deployment
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "📦 Generating preview deployment info..."
+        
+        # Create a preview deployment summary
+        cat > preview-deployment.md << EOF
+        ## 🔍 Preview Deployment
+        
+        **Branch:** \`${{ github.head_ref }}\`
+        **Commit:** \`${{ github.sha }}\`
+        **Build Status:** ✅ Passed
+        
+        ### Files Generated:
+        $(ls -la dist/)
+        
+        ### Next Steps:
+        1. Merge this PR to deploy to production
+        2. Or manually test by downloading the artifacts
+        
+        ### Testing Instructions:
+        1. Download the build artifacts
+        2. Host the files on a local server with HTTPS
+        3. Update manifest.xml with your local server URL
+        4. Sideload the add-in in Excel
+        EOF
+        
+        echo "Preview deployment info generated"
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ github.sha }}
+        path: dist/
+        retention-days: 7
+
